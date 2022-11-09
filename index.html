@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Заявки</title>
+    <link rel="stylesheet" href="css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body class="body-light">
+<h1>Заявки</h1>
+<div class="loader"></div>
+
+<template id="order-card">
+    <div class="order order-hide border">
+        <div class="title border title-hide">
+            <div class="no"></div><div class="date"></div>
+        </div>
+        <div class="order__body">
+            <p class="address"></p>
+            <p class="description"></p>
+            <p class="code"></p>
+            <p class="gps"></p>
+            <button class="order-done">Выполнена</button>
+        </div>
+        <button class="show-hide-button" data-hidden="true">▼ Показать ▼</button>
+    </div>
+</template>
+
+<template id="close-order-dialog">
+    <div class="close-dialog">
+        <button class="close-order-btn">Закрыть заявку</button>
+        <button class="cancel-order-btn">отмена</button>
+    </div>
+</template>
+
+<!--<script src="main.js" type="application/javascript"></script>-->
+<script src="js/main.js" type="module"></script>
+</body>
+</html>
