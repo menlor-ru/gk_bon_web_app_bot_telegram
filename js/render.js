@@ -26,14 +26,15 @@ function setColorTheme(themeParams){
 }
 
 
-function createOrders(json_orders){
-    body_document.querySelector('.loader').remove();
+function createOrders(jsonOrders){
+    const loader = body_document.querySelector('.loader')
+    if (loader) {loader.remove();}
     const sectionOrders = document.createElement('section');
     sectionOrders.classList.add('orders')
-    if (json_orders.length === 0){
+    if (jsonOrders.length === 0){
         sectionOrders.innerHTML = '<h2>Заявок нет.</h2>';
     } else {
-        const newOrder = json_orders.forEach((order) => {
+        const newOrder = jsonOrders.forEach((order) => {
             sectionOrders.append(createOrderCard(order));
         })
     }

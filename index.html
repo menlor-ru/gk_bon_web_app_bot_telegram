@@ -9,6 +9,17 @@
 </head>
 <body class="body-light">
 <h1>Заявки</h1>
+<div class="sort">
+    <p>
+        Сортировать по:
+        <select name="sorter">
+            <option value="no-desc" selected>Сначала новые</option>
+            <option value="no-asc">Сначала старые</option>
+            <option value="address-asc">Адресу А-Я</option>
+            <option value="address-desc">Адресу Я-А</option>
+          </select>
+    </p>
+</div>
 <div class="loader"></div>
 
 <template id="order-card">
