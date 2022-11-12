@@ -60,14 +60,10 @@ function globalListener(){
 
 function sortingOrders(selectValue){
     let [column, type] = selectValue.split('-');
-    console.log(column)
     const ordersJson = JSON.parse(sessionStorage.getItem("ordersJson"));
     ordersJson.sort((a, b) => {
         if (type === 'asc'){
-            console.log(typeof column)
             if(column === 'no'){
-                console.log(a[column])
-                console.log(parseInt(a[column]))
                 return (parseInt(a[column].split('-')[1]) > parseInt(b[column].split('-')[1]) ? 1 : -1);
             }
             return (a[column] > b[column] ? 1 : -1);
