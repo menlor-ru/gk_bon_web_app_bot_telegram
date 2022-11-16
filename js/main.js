@@ -43,7 +43,7 @@ function globalListener(){
         }
         if (evt.target.classList.contains('order-done')){
             const orderCard = evt.target.closest('.order');
-            orderCard.append(createCloseDialog(orderCard.dataset.orderId))
+            orderCard.append(createCloseDialog())
             return;
         }
 

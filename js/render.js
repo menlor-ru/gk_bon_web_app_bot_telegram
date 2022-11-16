@@ -2,21 +2,21 @@ import { sendPost } from './requests.js'
 import { API_WATCHED_ORDER } from './const.js'
 import { convertingToHtml } from './parser.js'
 
-const body_document = document.querySelector('body');
+const bodyDocument = document.querySelector('body');
 const orderTemplate = document.querySelector('#order-card').content;
 const orderCloseDialogTemplate = document.querySelector('#close-order-dialog').content;
 
 function switchTheme(theme= 'light'){
-    if (body_document.classList.contains(`body-${theme}`)){
+    if (bodyDocument.classList.contains(`body-${theme}`)){
         return
     }
-    body_document.classList.remove(...body_document.classList);
-    body_document.classList.add(`body-${theme}`)
+    bodyDocument.classList.remove(...bodyDocument.classList);
+    bodyDocument.classList.add(`body-${theme}`)
 }
 
 function setColorTheme(themeParams){
-    body_document.style.backgroundColor = themeParams['bg_color'];
-    body_document.style.color = themeParams['text_color'];
+    bodyDocument.style.backgroundColor = themeParams['bg_color'];
+    bodyDocument.style.color = themeParams['text_color'];
     orderTemplate.querySelector('.order').style.backgroundColor = themeParams['secondary_bg_color'];
     const style = document.createElement('style')
     style.setAttribute('type', 'text/css');
@@ -27,18 +27,18 @@ function setColorTheme(themeParams){
 
 
 function createOrders(jsonOrders){
-    const loader = body_document.querySelector('.loader')
+    const loader = bodyDocument.querySelector('.loader')
     if (loader) {loader.remove();}
     const sectionOrders = document.createElement('section');
     sectionOrders.classList.add('orders')
     if (jsonOrders.length === 0){
         sectionOrders.innerHTML = '<h2>Заявок нет.</h2>';
     } else {
-        const newOrder = jsonOrders.forEach((order) => {
+        jsonOrders.forEach((order) => {
             sectionOrders.append(createOrderCard(order));
         })
     }
-    body_document.append(sectionOrders);
+    bodyDocument.append(sectionOrders);
 }
 
 function createOrderCard(order){
@@ -46,7 +46,7 @@ function createOrderCard(order){
     orderCard.dataset.orderId = order['id'];
     orderCard.querySelector('.no').textContent = order['no'];
     orderCard.querySelector('.date').textContent = order['date_open'];
-    orderCard.querySelector('.address').innerHTML = `<b>${order['address']}</b>`;
+    orderCard.querySelector('.address').innerHTML = `<b>${order['address']}, кв.${order['apartment']}</b>`;
 
     orderCard.querySelector('.description').innerHTML = convertingToHtml(order['description']);
 
@@ -63,6 +63,8 @@ function createOrderCard(order){
         title.classList.add('border-new');
         const showButton = orderCard.querySelector('.show-hide-button');
         showButton.style.backgroundColor = '#4bab71';
+
+        // WATCHED FUNCTION
         showButton.addEventListener('click', ()=>{
             (async () => {
                 const response = await sendPost(API_WATCHED_ORDER, {id: order['id']});
@@ -73,6 +75,16 @@ function createOrderCard(order){
                     title.classList.remove('border-new');
                     title.classList.add('border');
                     showButton.style.backgroundColor = '';
+
+                    let orders = JSON.parse(sessionStorage.getItem("ordersJson"));
+                    orders = orders.map((element) => {
+                        if (order['id'] === element['id']){
+                            element['watched'] = true;
+                            return element
+                        }
+                        return element
+                    })
+                    sessionStorage.setItem("ordersJson", [JSON.stringify(orders)]);
                 }
             })()
         }, {once: true})
@@ -80,7 +92,7 @@ function createOrderCard(order){
     return orderCard
 }
 
-function createCloseDialog(id_order){
+function createCloseDialog(){
     const closeDialog = orderCloseDialogTemplate.querySelector('.close-dialog').cloneNode(true);
     return closeDialog;
 }

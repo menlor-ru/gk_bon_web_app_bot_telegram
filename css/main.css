@@ -50,6 +50,10 @@ button{
     text-align: center;
 }
 
+select[name="sorter"]{
+    font-size: 1em;
+}
+
 .orders{
     max-width: 100%;
     min-width: 80%;
