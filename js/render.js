@@ -2,32 +2,35 @@ import { sendPost } from './requests.js'
 import { API_WATCHED_ORDER } from './const.js'
 import { convertingToHtml } from './parser.js'
 
-const body_document = document.querySelector('body');
-const orderTemplate = document.querySelector('#order-card').content;
-const orderCloseDialogTemplate = document.querySelector('#close-order-dialog').content;
+const bodyElement = document.querySelector('body');
 
 function switchTheme(theme= 'light'){
-    if (body_document.classList.contains(`body-${theme}`)){
+    if (bodyElement.classList.contains(`body-${theme}`)){
         return
     }
-    body_document.classList.remove(...body_document.classList);
-    body_document.classList.add(`body-${theme}`)
+    bodyElement.classList.remove(...bodyElement.classList);
+    bodyElement.classList.add(`body-${theme}`)
 }
 
 function setColorTheme(themeParams){
-    body_document.style.backgroundColor = themeParams['bg_color'];
-    body_document.style.color = themeParams['text_color'];
-    orderTemplate.querySelector('.order').style.backgroundColor = themeParams['secondary_bg_color'];
+    bodyElement.style.backgroundColor = themeParams['bg_color'];
+    bodyElement.style.color = themeParams['text_color'];
+    bodyElement.querySelector('.main-menu').style.backgroundColor = themeParams['secondary_bg_color'];
+
     const style = document.createElement('style')
     style.setAttribute('type', 'text/css');
-    // style.textContent = `a { color: ${themeParams['link_color']} }`;
-    style.textContent = `.telephone { color: ${themeParams['link_color']}; text-decoration: underline; }`;
-    document.head.appendChild(style)
+    style.textContent = `a { color: ${themeParams['link_color']} } `;
+    // Если главная страница устанавливаем стили для заявок
+    if (location.pathname === '/'){
+        document.querySelector('#order-card').content.querySelector('.order').style.backgroundColor = themeParams['secondary_bg_color'];
+        style.textContent = `${style.textContent}.telephone { color: ${themeParams['link_color']}; text-decoration: underline; }`;
+    }
+    document.head.appendChild(style);
 }
 
 
 function createOrders(jsonOrders){
-    const loader = body_document.querySelector('.loader')
+    const loader = bodyElement.querySelector('.loader')
     if (loader) {loader.remove();}
     const sectionOrders = document.createElement('section');
     sectionOrders.classList.add('orders')
@@ -38,11 +41,11 @@ function createOrders(jsonOrders){
             sectionOrders.append(createOrderCard(order));
         })
     }
-    body_document.append(sectionOrders);
+    bodyElement.append(sectionOrders);
 }
 
 function createOrderCard(order){
-    const orderCard = orderTemplate.querySelector('.order').cloneNode(true);
+    const orderCard = document.querySelector('#order-card').content.querySelector('.order').cloneNode(true);
     orderCard.dataset.orderId = order['id'];
     orderCard.querySelector('.no').textContent = order['no'];
     orderCard.querySelector('.date').textContent = order['date_open'];
@@ -81,7 +84,7 @@ function createOrderCard(order){
 }
 
 function createCloseDialog(id_order){
-    const closeDialog = orderCloseDialogTemplate.querySelector('.close-dialog').cloneNode(true);
+    const closeDialog = document.querySelector('#close-order-dialog').content.querySelector('.close-dialog').cloneNode(true);
     return closeDialog;
 }
 
