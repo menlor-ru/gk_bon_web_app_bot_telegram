@@ -71,6 +71,7 @@ const setColorTheme = (themeParams) => {
 }
 
 
+
 const createOrders = (jsonOrders) => {
     const sectionOrders = document.createElement('section');
     sectionOrders.classList.add('orders')
@@ -89,7 +90,7 @@ const createOrderCard = (order) => {
     orderCard.dataset.orderId = order['id'];
     orderCard.querySelector('.no').textContent = order['no'];
     orderCard.querySelector('.date').textContent = order['date_open'];
-    orderCard.querySelector('.address').innerHTML = `<b>${order['address']}</b>`;
+    orderCard.querySelector('.address').innerHTML = `<b>${order['address']}, кв.${order['apartment']}</b>`;
 
     orderCard.querySelector('.description').innerHTML = convertingToHtml(order['description']);
 
@@ -106,6 +107,8 @@ const createOrderCard = (order) => {
         title.classList.add('border-new');
         const showButton = orderCard.querySelector('.show-hide-button');
         showButton.style.backgroundColor = '#4bab71';
+
+        // WATCHED FUNCTION
         showButton.addEventListener('click', ()=>{
             (async () => {
                 const initDataTg = window.Telegram.WebApp.initData === ''?  INIT_DATA_MOCK : window.Telegram.WebApp.initData; 
@@ -119,6 +122,7 @@ const createOrderCard = (order) => {
                     title.classList.remove('border-new');
                     title.classList.add('border');
                     showButton.style.backgroundColor = '';
+                    
                     // сохранем в сессию список Заявок с обновленным полем watched
                     let ordersJson = JSON.parse(sessionStorage.getItem("ordersJson"));
                     ordersJson = ordersJson.map((element) => {
