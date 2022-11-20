@@ -1,15 +1,17 @@
 import { sendPost } from './requests.js'
-import { createOrders, createCloseDialog } from "./render.js";
-import { API_USER_ORDERS, API_CLOSE_ORDER } from './const.js';
+import { createOrders, createCloseDialog, createSorterElement, showLoader, hideLoader } from "./render.js";
+import { API_USER_ORDERS, API_CLOSE_ORDER, INIT_DATA_MOCK, BODY_ELEMENT } from './const.js';
 
-function getPageOrders(){
+
+
+const getPageOrders = () => {
+    // запрашивает и выводит любые страницы кроме главной (Заявки)
+    createSorterElement();
     (async () => {
+        showLoader();
         let responseJson;
-        if (location.host === '127.0.0.1:5500' || '192.168.0.102:5500'){
-            responseJson = await sendPost(API_USER_ORDERS, {initData: 'query_id=AAH3VZUwAAAAAPdVlTB7ve9F&user=%7B%22id%22%3A815093239%2C%22first_name%22%3A%22%F0%9D%94%BC%F0%9D%95%98%F0%9D%95%A0%F0%9D%95%A3%22%2C%22last_name%22%3A%22%22%2C%22username%22%3A%22menlor%22%2C%22language_code%22%3A%22ru%22%7D&auth_date=1667667409&hash=1a7a95ac21d8640bdad7e48996682e3ab9ecc799f277605fc47738018cea90b4'});
-        } else {
-            responseJson = await sendPost(API_USER_ORDERS, {initData: window.Telegram.WebApp.initData});
-        }
+        const initDataTg = window.Telegram.WebApp.initData === ''?  INIT_DATA_MOCK : window.Telegram.WebApp.initData;
+        responseJson = await sendPost(API_USER_ORDERS, {initData: initDataTg});
         if (responseJson){
             sessionStorage.setItem("ordersJson", [JSON.stringify(responseJson)])
             const selectFied = document.querySelector('select[name=sorter]');
@@ -17,38 +19,16 @@ function getPageOrders(){
             selectFied.addEventListener('change', (evt)=>{
                 sortingOrders(evt.target.value);
             });
+            hideLoader();
             return undefined;
         }
-        document.querySelector('body').innerHTML = '<h1>Заявок нет!</h1>';
+        BODY_ELEMENT.innerHTML = '<h1>Заявок нет!</h1>';
+        hideLoader();
         return undefined;
         })()
 }
 
-function globalListener(){
-    const sectionOrders = document.querySelector('.orders');
-    sectionOrders.addEventListener('click', (evt) => {
-        if (evt.target.classList.contains('show-hide-button')){
-            showHideOrderCard(evt);
-            return;
-        }
-        if (evt.target.classList.contains('order-done')){
-            const orderCard = evt.target.closest('.order');
-            orderCard.append(createCloseDialog(orderCard.dataset.orderId))
-            return;
-        }
-
-        if (evt.target.classList.contains('close-order-btn')){
-            closeOrder(evt);
-            return;
-        }
-        if (evt.target.classList.contains('cancel-order-btn')) {
-            const orderCard = evt.target.closest('.order');
-            orderCard.removeChild(orderCard.querySelector('.close-dialog'))
-        }
-    })
-}
-
-function showHideOrderCard(evt){
+const showHideOrderCard = (evt) => {
     const parentDiv = evt.target.parentElement;
     const title = parentDiv.querySelector('.title')
     if (evt.target.dataset.hidden === 'true'){
@@ -72,11 +52,14 @@ function showHideOrderCard(evt){
     evt.target.textContent = '▼ Показать ▼';
 }
 
-function closeOrder(evt){
+const closeOrder = (evt) => {
     const orderCard = evt.target.closest('.order');
     evt.target.closest('.close-dialog').innerHTML = '<div class="loader"></div>';
     (async () => {
-        const responseJson = await sendPost(API_CLOSE_ORDER, {id: orderCard.dataset.orderId});
+        const initDataTg = window.Telegram.WebApp.initData === ''?  INIT_DATA_MOCK : window.Telegram.WebApp.initData;
+        const responseJson = await sendPost(API_CLOSE_ORDER, {
+            initData: initDataTg,
+            id: orderCard.dataset.orderId});
         if (responseJson['result']){
             let ordersJson = JSON.parse(sessionStorage.getItem("ordersJson"));
             ordersJson = ordersJson.filter((order) => order.id !== parseInt(orderCard.dataset.orderId));
@@ -97,7 +80,33 @@ function closeOrder(evt){
     })()
 }
 
+const ordersSectionListener = () => {
+    const sectionOrders = document.querySelector('.orders');
+    sectionOrders.addEventListener('click', (evt) => {
+        if (evt.target.classList.contains('show-hide-button')){
+            showHideOrderCard(evt);
+            return;
+        }
+        if (evt.target.classList.contains('order-done')){
+            const orderCard = evt.target.closest('.order');
+            orderCard.append(createCloseDialog())
+            return;
+        }
+
+        if (evt.target.classList.contains('close-order-btn')){
+            closeOrder(evt);
+            return;
+        }
+        if (evt.target.classList.contains('cancel-order-btn')) {
+            const orderCard = evt.target.closest('.order');
+            orderCard.removeChild(orderCard.querySelector('.close-dialog'))
+        }
+    })
+}
+
+
 function sortingOrders(selectValue){
+    // Соритрует, создаёт и добавляет слушателя на заявки
     let [column, type] = selectValue.split('-');
     const ordersJson = JSON.parse(sessionStorage.getItem("ordersJson"));
     ordersJson.sort((a, b) => {
@@ -116,7 +125,7 @@ function sortingOrders(selectValue){
     const orders = document.querySelector('.orders');
     if (orders) {orders.remove();}
     createOrders(ordersJson);
-    globalListener();
+    ordersSectionListener();
 }
 
 export { getPageOrders }

@@ -1,34 +1,30 @@
-import { LinksMenu } from './const.js'
+import { LinksMenu, BODY_ELEMENT } from './const.js'
+import { getContentCurrentPage } from './render.js'
 
-const body = document.querySelector('body');
 
 const iconMenuElement = document.createElement('div');
-iconMenuElement.classList.add('icon-menu');
-iconMenuElement.textContent = '☰';
-
 const menuWrapperElement = document.createElement('div');
-menuWrapperElement.classList.add('menu-wrapper')
-menuWrapperElement.setAttribute('hidden', 'true')
-
 const mainMenuElement = document.createElement('menu');
-mainMenuElement.classList.add('main-menu');
-mainMenuElement.classList.add('menu-hide');
-mainMenuElement.innerHTML = `
-    <div class="close-menu-btn">✖</div>
-`;
 
-const closeMenuBtnElement = mainMenuElement.querySelector('.close-menu-btn');
 
 const crateLinksMenu = () =>{
+    // Создаёт или перерисовывает список ссылок меню
+    if (location.hash === '' || location.hash.startsWith('#tgWebAppData=query_id')) {location.hash = '#/'}
+    const ulOldMenu = mainMenuElement.querySelector('ul');
+    if (ulOldMenu){
+        ulOldMenu.remove();
+    }
     const ulLinksElement = document.createElement('ul');
     LinksMenu.forEach(({textName, href})=>{
-        if (href === location.pathname){
+        if (location.hash.slice(1) === href){
             ulLinksElement.innerHTML = `${ulLinksElement.innerHTML}<li><b>${textName}</b></li>`
             return;
         }
         ulLinksElement.innerHTML = `${ulLinksElement.innerHTML}<li><a href="${href}">${textName}</a></li>`
     })
     mainMenuElement.append(ulLinksElement)
+    setMenuLinkListner();
+    getContentCurrentPage();
 }
 
 const closeMenu = () => {
@@ -51,17 +47,42 @@ const showMenu = () =>{
 }
 
 const addMenuIconListner = () => {
-    iconMenuElement.addEventListener('click', showMenu)
+    const iconMenuElement = BODY_ELEMENT.querySelector('.icon-menu');
+    iconMenuElement.addEventListener('click', showMenu);
 }
 
 const addCloseMenuBtnListner = () => {
-    closeMenuBtnElement.addEventListener('click', closeMenu)
+    const closeMenuBtnElement = mainMenuElement.querySelector('.close-menu-btn');
+    closeMenuBtnElement.addEventListener('click', closeMenu);
 }
 
 const createMenu = () => {
-    body.append(...[iconMenuElement, menuWrapperElement, mainMenuElement]);
+    iconMenuElement.classList.add('icon-menu');
+    iconMenuElement.textContent = '☰';
+
+    menuWrapperElement.classList.add('menu-wrapper')
+    menuWrapperElement.setAttribute('hidden', 'true')
+
+    mainMenuElement.classList.add('main-menu');
+    mainMenuElement.classList.add('menu-hide');
+    mainMenuElement.innerHTML = `
+        <div class="close-menu-btn">✖</div>
+    `;
+
+    BODY_ELEMENT.append(...[iconMenuElement, menuWrapperElement, mainMenuElement]);
     crateLinksMenu();
-    // iconMenuElement = body.querySelector('.icon-menu')
 }
 
-export { addMenuIconListner, addCloseMenuBtnListner, createMenu };
+const setMenuLinkListner = () => {
+    const ulMenuElement = mainMenuElement.querySelector('ul');
+    ulMenuElement.addEventListener('click', (evt) => {
+        if (evt.target.tagName === 'A'){
+            evt.preventDefault();
+            location.hash = evt.target.getAttribute('href');
+            crateLinksMenu();
+            closeMenu();
+        }
+    })
+}
+
+export { addMenuIconListner, addCloseMenuBtnListner, createMenu, setMenuLinkListner };
