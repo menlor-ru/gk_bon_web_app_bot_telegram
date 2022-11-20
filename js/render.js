@@ -1,34 +1,78 @@
 import { sendPost } from './requests.js'
-import { API_WATCHED_ORDER } from './const.js'
+import { API_WATCHED_ORDER, INIT_DATA_MOCK, LinksMenu, BODY_ELEMENT, LOADER_ELEMENT } from './const.js'
 import { convertingToHtml } from './parser.js'
 
-const bodyDocument = document.querySelector('body');
-const orderTemplate = document.querySelector('#order-card').content;
-const orderCloseDialogTemplate = document.querySelector('#close-order-dialog').content;
+const showLoader = () => {
+    if (LOADER_ELEMENT.attributes['hidden']){
+        LOADER_ELEMENT.removeAttribute('hidden');
+    }
+}
 
-function switchTheme(theme= 'light'){
-    if (bodyDocument.classList.contains(`body-${theme}`)){
+const hideLoader = () => {
+    if (!LOADER_ELEMENT.attributes['hidden']){
+        LOADER_ELEMENT.setAttribute('hidden', 'true');
+    }
+}
+
+const createSorterElement = () => {
+    const sorterTemplate = BODY_ELEMENT.querySelector('#sorter-template').content.cloneNode(true);
+    const contentPage = BODY_ELEMENT.querySelector('.content-page');
+    contentPage.append(sorterTemplate);
+}
+
+const getContentCurrentPage = () => { 
+    (async () => {
+        showLoader();
+        const contentElement = document.querySelector('.content-page');
+        contentElement.innerHTML = '';
+        const currentPage = LinksMenu.filter(({href})=>href === location.hash.slice(1));
+        if (currentPage.length === 1){
+            if (location.hash === '#/'){
+                await currentPage[0].func();
+            } else {
+                const contentPage = await currentPage[0].func(location.hash.slice(1));
+                if (contentPage){
+                    // contentPage - текстовая строка типа "<a href=\"#\">Скачать инструкцию</a>"
+                    // первый и последний символ <"> слайсом убираем их. Затем заменой убераем экранирование <\"> со всех <">
+                    contentElement.innerHTML = contentPage.slice(1, -1).replaceAll('\\', '');
+                    BODY_ELEMENT.append(contentElement);
+                    hideLoader();
+                    return;
+                }
+                contentElement.innerHTML = `<h1>Пусто</h1><p>Тут ничего нет</p>`;
+                BODY_ELEMENT.append(contentElement);
+                hideLoader();
+            }
+            
+        }
+    }
+    )();
+}
+
+const switchTheme = (theme = 'light') => {
+    if (BODY_ELEMENT.classList.contains(`body-${theme}`)){
         return
     }
-    bodyDocument.classList.remove(...bodyDocument.classList);
-    bodyDocument.classList.add(`body-${theme}`)
+    BODY_ELEMENT.classList.remove(...BODY_ELEMENT.classList);
+    BODY_ELEMENT.classList.add(`body-${theme}`)
 }
 
-function setColorTheme(themeParams){
-    bodyDocument.style.backgroundColor = themeParams['bg_color'];
-    bodyDocument.style.color = themeParams['text_color'];
-    orderTemplate.querySelector('.order').style.backgroundColor = themeParams['secondary_bg_color'];
+const setColorTheme = (themeParams) => {
     const style = document.createElement('style')
     style.setAttribute('type', 'text/css');
-    // style.textContent = `a { color: ${themeParams['link_color']} }`;
-    style.textContent = `.telephone { color: ${themeParams['link_color']}; text-decoration: underline; }`;
-    document.head.appendChild(style)
+    style.textContent = `
+        body {background-color: ${themeParams['bg_color']}; color: ${themeParams['text_color']}}
+        a {color: ${themeParams['link_color']}; } 
+        details {border-color: ${themeParams['text_color']};}
+        .order, .main-menu {background-color: ${themeParams['secondary_bg_color']};}
+        .telephone {color: ${themeParams['link_color']}; text-decoration: underline; }
+    `;
+    document.head.appendChild(style);
 }
 
 
-function createOrders(jsonOrders){
-    const loader = bodyDocument.querySelector('.loader')
-    if (loader) {loader.remove();}
+
+const createOrders = (jsonOrders) => {
     const sectionOrders = document.createElement('section');
     sectionOrders.classList.add('orders')
     if (jsonOrders.length === 0){
@@ -38,11 +82,11 @@ function createOrders(jsonOrders){
             sectionOrders.append(createOrderCard(order));
         })
     }
-    bodyDocument.append(sectionOrders);
+    BODY_ELEMENT.querySelector('.content-page').append(sectionOrders);
 }
 
-function createOrderCard(order){
-    const orderCard = orderTemplate.querySelector('.order').cloneNode(true);
+const createOrderCard = (order) => {
+    const orderCard = document.querySelector('#order-card').content.querySelector('.order').cloneNode(true);
     orderCard.dataset.orderId = order['id'];
     orderCard.querySelector('.no').textContent = order['no'];
     orderCard.querySelector('.date').textContent = order['date_open'];
@@ -67,7 +111,10 @@ function createOrderCard(order){
         // WATCHED FUNCTION
         showButton.addEventListener('click', ()=>{
             (async () => {
-                const response = await sendPost(API_WATCHED_ORDER, {id: order['id']});
+                const initDataTg = window.Telegram.WebApp.initData === ''?  INIT_DATA_MOCK : window.Telegram.WebApp.initData; 
+                const response = await sendPost(API_WATCHED_ORDER, {
+                    initData: initDataTg,
+                    id: order['id']});
                 if (response['result']){
                     orderCard.classList.remove('border-new')
                     orderCard.classList.add('border')
@@ -75,16 +122,17 @@ function createOrderCard(order){
                     title.classList.remove('border-new');
                     title.classList.add('border');
                     showButton.style.backgroundColor = '';
-
-                    let orders = JSON.parse(sessionStorage.getItem("ordersJson"));
-                    orders = orders.map((element) => {
-                        if (order['id'] === element['id']){
-                            element['watched'] = true;
-                            return element
+                    
+                    // сохранем в сессию список Заявок с обновленным полем watched
+                    let ordersJson = JSON.parse(sessionStorage.getItem("ordersJson"));
+                    ordersJson = ordersJson.map((element) => {
+                        if (element.id === order.id){
+                            element.watched = true;
+                            return element;
                         }
-                        return element
-                    })
-                    sessionStorage.setItem("ordersJson", [JSON.stringify(orders)]);
+                        return element;
+                    });
+                    sessionStorage.setItem("ordersJson", [JSON.stringify(ordersJson)]);
                 }
             })()
         }, {once: true})
@@ -92,9 +140,11 @@ function createOrderCard(order){
     return orderCard
 }
 
-function createCloseDialog(){
-    const closeDialog = orderCloseDialogTemplate.querySelector('.close-dialog').cloneNode(true);
+const createCloseDialog = () => {
+    const closeDialog = document.querySelector('#close-order-dialog').content.querySelector('.close-dialog').cloneNode(true);
     return closeDialog;
 }
 
-export { createOrders, createCloseDialog, switchTheme, setColorTheme }
+export { getContentCurrentPage, createOrders, createCloseDialog, 
+    switchTheme, setColorTheme, createSorterElement,
+    showLoader, hideLoader }

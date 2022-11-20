@@ -8,19 +8,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body class="body-light">
-<h1>Заявки</h1>
-<div class="sort">
-    <p>
-        Сортировать по:
-        <select name="sorter">
-            <option value="no-desc" selected>Сначала новые</option>
-            <option value="no-asc">Сначала старые</option>
-            <option value="address-asc">Адресу А-Я</option>
-            <option value="address-desc">Адресу Я-А</option>
-          </select>
-    </p>
+    <div class="loader"></div>
+<div class="content-page">
 </div>
-<div class="loader"></div>
 
 <template id="order-card">
     <div class="order order-hide border">
@@ -45,7 +35,21 @@
     </div>
 </template>
 
-<!--<script src="main.js" type="application/javascript"></script>-->
+<template id="sorter-template">
+    <h1>Заявки</h1>
+    <div class="sort">
+        <p>
+            Сортировать по:
+            <select name="sorter">
+                <option value="no-desc" selected>Сначала новые</option>
+                <option value="no-asc">Сначала старые</option>
+                <option value="address-asc">Адресу А-Я</option>
+                <option value="address-desc">Адресу Я-А</option>
+                </select>
+        </p>
+    </div>
+</template>
+
 <script src="js/main.js" type="module"></script>
 </body>
 </html>

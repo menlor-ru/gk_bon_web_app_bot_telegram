@@ -1,3 +1,8 @@
+html {
+    margin: 0;
+    padding: 0;
+}
+
 body{
     width: 100%;
     box-sizing: border-box;
@@ -22,6 +27,8 @@ body{
     border: 2px solid #4bab71;
 }
 h1{
+    margin-top: 0;
+    padding-top: 20px;
     text-align: center;
     width: 100%;
 }
@@ -42,6 +49,65 @@ button{
     cursor: pointer;
 }
 
+.icon-menu{
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 1.7em;
+    font-weight: 600;
+    padding: 3px 10px;
+    cursor: pointer;
+}
+
+.menu-wrapper{
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 1400;
+}
+
+.main-menu{
+    position: fixed;
+    top: 0;
+    height: 100%;
+    width: 70%;
+    background-color: #dff1ff;
+    margin: 0;
+    padding: 10px 20px;
+    z-index: 1500;
+    border-left: 2px solid #000000;
+    transition: right 0.5s;
+}
+
+.menu-show{
+    right: 0;
+}
+
+.menu-hide{
+    right: -90%;
+}
+
+.main-menu ul{
+    list-style: none;
+    padding: 0;
+}
+
+.main-menu ul li{
+    padding: 0.2em;
+}
+
+.close-menu-btn{
+    text-align: right;
+    font-size: 1.7em;
+    font-weight: 600;
+    padding: 3px 10px;
+    cursor: pointer;
+}
+
 .sort {
     width: 100%;
 }
@@ -50,7 +116,7 @@ button{
     text-align: center;
 }
 
-select[name="sorter"]{
+.sort select{
     font-size: 1em;
 }
 
@@ -86,7 +152,6 @@ select[name="sorter"]{
     max-width: 100%;
     font-size: 0.8em;
     margin: 0;
-    /*padding: 10px;*/
     border-top: 0;
     border-left: 0;
     border-right: 0;
@@ -132,8 +197,6 @@ select[name="sorter"]{
     left: 0;
     bottom: 0;
     z-index: 100;
-    /*border-top-left-radius: 0;*/
-    /*border-top-right-radius: 0;*/
     border-radius: 0;
     font-weight: bold;
     text-transform: uppercase;
@@ -175,12 +238,14 @@ select[name="sorter"]{
 }
 
 .loader {
+    position: absolute;
     width: 100px;
     height: 100px;
     transition: all 0.5s ease;
     animation: move 3s linear infinite;
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: 50px;
+    margin-left: calc(50vw - 50px);
+    z-index: 800;
 }
 
 @keyframes move {
@@ -205,4 +270,15 @@ select[name="sorter"]{
         background: green;
         border-radius: 0;
     }
+}
+
+details{
+    margin: 0 10px 10px;
+    padding: 10px 15px;
+    border: 1px solid #000000;
+    border-radius: 20px;
+}
+
+summary{
+    font-weight: 600;
 }

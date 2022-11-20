@@ -1,4 +1,5 @@
 function convertingToHtml (parseStr){
+    // конвертирует (парсит?) в HTML заявку полученную с сервера
     const matches = (() => {
         return [...parseStr.matchAll(new RegExp('([0-9]|[-()+]){7,}', 'g'))];
     })()
@@ -7,7 +8,6 @@ function convertingToHtml (parseStr){
         if (numberPhone.startsWith('7')){
             numberPhone = `+${numberPhone}`
         }
-        // numberPhone = `<a href="tel:${numberPhone}">${math[0]}</a>`;
         numberPhone = `<b class="telephone">${numberPhone}</b>`;
         parseStr = parseStr.replaceAll(math[0], numberPhone);
     });
