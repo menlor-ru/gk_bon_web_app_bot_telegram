@@ -65,7 +65,12 @@ const setColorTheme = (themeParams) => {
         a {color: ${themeParams['link_color']}; } 
         details {border-color: ${themeParams['text_color']};}
         .order, .main-menu {background-color: ${themeParams['secondary_bg_color']};}
-        .telephone {color: ${themeParams['link_color']}; text-decoration: underline; }
+        .telephone {color: ${themeParams['link_color']}; text-decoration: underline;}
+        details table,
+        details table td,
+        details table th{
+            border-color: ${themeParams['text_color']};
+        }
     `;
     document.head.appendChild(style);
 }

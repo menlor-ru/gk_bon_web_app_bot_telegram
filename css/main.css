@@ -282,3 +282,29 @@ details{
 summary{
     font-weight: 600;
 }
+
+.table-wrapper {
+    overflow-x: scroll;
+    -ms-overflow-x: scroll;
+}
+
+.table-wrapper table {
+    border:1px solid black;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.table-wrapper table td,
+.table-wrapper table th{
+    border:1px solid black;
+    border-bottom: 0;
+    padding: 0 5px;
+    margin: 0;
+}
+
+.table-wrapper table tr th:nth-last-child(odd),
+.table-wrapper table tr td:nth-last-child(odd){
+    text-align: center;
+    min-width: 75px;
+}
+
